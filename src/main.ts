@@ -1,5 +1,18 @@
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+const scoreContainer = document.querySelector(
+  ".score-container"
+) as HTMLDivElement;
+let score: number = 0;
+let highScore = 0;
+
+const savedHighScore = localStorage.getItem("high-score");
+
+if (savedHighScore) {
+  highScore = Number(savedHighScore);
+  scoreContainer.innerHTML = `score: ${score} <br /> high score: ${highScore}`;
+} else localStorage.setItem("high-score", "0");
+
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
@@ -14,7 +27,7 @@ class Player {
     y: number,
     radius: number,
     color: string,
-    ctx: CanvasRenderingContext2D,
+    ctx: CanvasRenderingContext2D
   ) {
     this.x = x;
     this.y = y;
@@ -49,7 +62,7 @@ class Projectile {
       x: number;
       y: number;
     },
-    ctx: CanvasRenderingContext2D,
+    ctx: CanvasRenderingContext2D
   ) {
     this.x = x;
     this.y = y;
@@ -76,16 +89,16 @@ const player = new Player(
   canvas.height / 2,
   25,
   "white",
-  ctx,
+  ctx
 );
 player.render();
-const projectiles: Projectile[] = [];
-const enemies: Enemy[] = [];
+let projectiles: Projectile[] = [];
+let enemies: Enemy[] = [];
 
 window.addEventListener("click", (event) => {
   const angle = Math.atan2(
     event.clientY - canvas.height / 2,
-    event.clientX - canvas.width / 2,
+    event.clientX - canvas.width / 2
   );
   const velocity = {
     x: Math.cos(angle) * 10,
@@ -98,8 +111,8 @@ window.addEventListener("click", (event) => {
       7,
       "white",
       velocity,
-      ctx,
-    ),
+      ctx
+    )
   );
 });
 
@@ -122,7 +135,7 @@ class Enemy {
       x: number;
       y: number;
     },
-    ctx: CanvasRenderingContext2D,
+    ctx: CanvasRenderingContext2D
   ) {
     this.x = x;
     this.y = y;
@@ -195,15 +208,27 @@ function animate() {
         enemy.radius -= 10;
       }
       animateId = false;
+      if (score >= Number(localStorage.getItem("high-score"))) {
+        localStorage.setItem("high-score", `${score}`);
+      }
+      const decision = confirm("would you like to play again?");
+      if (decision) {
+        projectiles = [];
+        enemies = [];
+        score = 0;
+        animate();
+      } else window.close();
     }
     projectiles.forEach((projectile, projectileIndex) => {
       const distance = Math.hypot(
         projectile.x - enemy.x,
-        projectile.y - enemy.y,
+        projectile.y - enemy.y
       );
       if (distance - enemy.radius - projectile.radius < 1) {
         enemies.splice(enemyIndex, 1);
         projectiles.splice(projectileIndex, 1);
+        score++;
+        scoreContainer.innerHTML = `score: ${score} <br /> high score: ${highScore}`;
       }
     });
   });
