@@ -7,3 +7,10 @@
 body {
   overflow: hidden;
 }
+
+.score-container {
+  position: absolute;
+  color: white;
+  font-size: 2rem;
+  padding: 1rem;
+}
